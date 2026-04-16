@@ -246,7 +246,7 @@ header h1 {
 .attr-overlay {
   position: absolute;
   top: 2%;
-  right: 0%;
+  right: 1%;
   width: 12%;
   z-index: 20;
   pointer-events: none;
