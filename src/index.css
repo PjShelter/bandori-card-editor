@@ -25,7 +25,7 @@ body {
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
   width: 100%;
@@ -44,20 +44,23 @@ header h1 {
 }
 
 .sidebar {
-  flex: 0 0 300px;
+  flex: 0 0 280px;
   background: #333;
   padding: 1.5rem;
   border-radius: 12px;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .control-group h3 {
   margin: 0 0 0.5rem 0;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
   color: #aaa;
+  letter-spacing: 0.5px;
 }
 
 .grid {
@@ -110,13 +113,7 @@ header h1 {
   border-color: #646cff;
 }
 
-.button-row {
-  display: flex;
-  gap: 0.5rem;
-}
-
 .upload-btn {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -130,26 +127,8 @@ header h1 {
   transition: background 0.2s;
 }
 
-.reset-btn {
-  background: #444;
-  border: none;
-  color: white;
-  padding: 0.8rem;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.reset-btn:hover {
-  background: #555;
-}
-
-.hint {
-  font-size: 0.75rem;
-  color: #888;
-  margin-top: 0.5rem;
+.upload-btn:hover {
+  background: #535bf2;
 }
 
 .export-btn {
@@ -164,28 +143,115 @@ header h1 {
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
-  margin-top: 1rem;
+  margin-top: auto;
 }
 
 .export-btn:hover {
   background: #059669;
 }
 
-.star-slider {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+/* Slider Controls */
+.slider-group {
+  margin-bottom: 0.75rem;
 }
 
-/* Card Preview Styles */
+.slider-group label {
+  display: block;
+  font-size: 0.8rem;
+  color: #ccc;
+  margin-bottom: 0.25rem;
+}
+
+.slider-group input[type="range"] {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #555;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.slider-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #646cff;
+  cursor: pointer;
+}
+
+.slider-group input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #646cff;
+  cursor: pointer;
+  border: none;
+}
+
+.star-slider input[type="range"] {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #555;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.star-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #646cff;
+  cursor: pointer;
+}
+
+/* Preview Area */
 .preview-area {
   flex: 1;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.image-controls {
+  background: #333;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.image-controls h3 {
+  width: 100%;
+  margin: 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: #aaa;
+  letter-spacing: 0.5px;
+}
+
+.image-controls .slider-group {
+  flex: 1;
+  min-width: 150px;
+  margin-bottom: 0;
+}
+
+.image-controls .text-btn {
+  width: auto;
+  margin: auto 0 0 auto;
+}
+
+.card-preview-wrapper {
   background: #1a1a1a;
   padding: 2rem;
   border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .card-container {
@@ -199,15 +265,25 @@ header h1 {
   border-radius: 24px;
 }
 
-.rnd-container {
-  z-index: 1;
-}
-
-.bg-image-edit {
+.character-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  pointer-events: none; /* Let the Rnd handle events */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transform-origin: center center;
+}
+
+.char-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
 }
 
 .bg-placeholder {
@@ -230,7 +306,7 @@ header h1 {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 5; /* Above character, below overlays */
+  z-index: 3;
   pointer-events: none;
 }
 
@@ -277,6 +353,15 @@ header h1 {
   .sidebar {
     flex: 1;
     width: 100%;
-    box-sizing: border-box;
+    max-height: none;
+  }
+  .preview-area {
+    width: 100%;
+  }
+  .image-controls {
+    flex-direction: column;
+  }
+  .image-controls .slider-group {
+    width: 100%;
   }
 }

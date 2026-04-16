@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import html2canvas from 'html2canvas';
-import { Upload, Download, RotateCcw } from 'lucide-react';
-import { Rnd } from 'react-rnd';
+import { Upload, Download } from 'lucide-react';
 
 const BANDS = [
   { id: 'band_1', name: 'Poppin\'Party', icon: '/assets/band_1.svg' },
@@ -41,10 +40,11 @@ const App: React.FC = () => {
   const [selectedFrame, setSelectedFrame] = useState(FRAMES[3]);
   const [isTrained, setIsTrained] = useState(TRAINED_STATUS[1]);
   const [starCount, setStarCount] = useState(4);
-  
-  // Image transformation state
-  const [imagePos, setImagePos] = useState({ x: 0, y: 0 });
-  const [imageSize, setImageSize] = useState({ width: '100%', height: '100%' });
+
+  // Image transform controls
+  const [offsetX, setOffsetX] = useState(0);
+  const [offsetY, setOffsetY] = useState(0);
+  const [scale, setScale] = useState(100);
 
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -54,16 +54,19 @@ const App: React.FC = () => {
       const reader = new FileReader();
       reader.onload = (event) => {
         setBgImage(event.target?.result as string);
-        // Reset transformation on new upload
-        resetImageTransform();
+        // Reset transform on new upload
+        setOffsetX(0);
+        setOffsetY(0);
+        setScale(100);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const resetImageTransform = () => {
-    setImagePos({ x: 0, y: 0 });
-    setImageSize({ width: '100%', height: '100%' });
+  const resetTransform = () => {
+    setOffsetX(0);
+    setOffsetY(0);
+    setScale(100);
   };
 
   const exportCard = async () => {
@@ -87,18 +90,13 @@ const App: React.FC = () => {
       </header>
 
       <main className="editor-layout">
+        {/* Left Sidebar - Fixed controls */}
         <div className="sidebar">
           <section className="control-group">
-            <div className="button-row">
-              <label className="upload-btn">
-                <Upload size={18} /> 上传人物图
-                <input type="file" accept="image/*" onChange={handleImageUpload} hidden />
-              </label>
-              <button className="reset-btn" onClick={resetImageTransform} title="重置位置大小">
-                <RotateCcw size={18} />
-              </button>
-            </div>
-            <p className="hint">提示：上传后可在右侧预览区拖拽图片位置，拉动边缘调整大小。</p>
+            <label className="upload-btn">
+              <Upload size={18} /> 上传人物图
+              <input type="file" accept="image/*" onChange={handleImageUpload} hidden />
+            </label>
           </section>
 
           <section className="control-group">
@@ -180,33 +178,64 @@ const App: React.FC = () => {
           </button>
         </div>
 
+        {/* Right Side - Preview with Image Adjustments */}
         <div className="preview-area">
+          {bgImage && (
+            <div className="image-controls">
+              <h3>图片调整</h3>
+              <div className="slider-group">
+                <label>X轴偏移: {offsetX}px</label>
+                <input
+                  type="range"
+                  min="-200"
+                  max="200"
+                  value={offsetX}
+                  onChange={(e) => setOffsetX(parseInt(e.target.value))}
+                />
+              </div>
+              <div className="slider-group">
+                <label>Y轴偏移: {offsetY}px</label>
+                <input
+                  type="range"
+                  min="-200"
+                  max="200"
+                  value={offsetY}
+                  onChange={(e) => setOffsetY(parseInt(e.target.value))}
+                />
+              </div>
+              <div className="slider-group">
+                <label>缩放: {scale}%</label>
+                <input
+                  type="range"
+                  min="50"
+                  max="200"
+                  value={scale}
+                  onChange={(e) => setScale(parseInt(e.target.value))}
+                />
+              </div>
+              <button className="text-btn" onClick={resetTransform}>
+                重置
+              </button>
+            </div>
+          )}
+
           <div className="card-container" ref={cardRef}>
-            {/* Draggable/Resizable Image Layer */}
+            {/* Frame Layer */}
+            <img src={selectedFrame.image} className="frame-overlay" alt="Frame" />
+
+            {/* Character Image Layer */}
             {bgImage ? (
-              <Rnd
-                position={imagePos}
-                size={imageSize}
-                onDragStop={(e, d) => setImagePos({ x: d.x, y: d.y })}
-                onResizeStop={(e, direction, ref, delta, position) => {
-                  setImageSize({
-                    width: ref.style.width,
-                    height: ref.style.height,
-                  });
-                  setImagePos(position);
+              <div
+                className="character-layer"
+                style={{
+                  transform: `translate(${offsetX}px, ${offsetY}px) scale(${scale / 100})`,
                 }}
-                bounds="parent"
-                lockAspectRatio={false}
-                className="rnd-container"
               >
-                <img src={bgImage} className="bg-image-edit" alt="Character" draggable={false} />
-              </Rnd>
+                <img src={bgImage} className="char-image" alt="Character" draggable={false} />
+              </div>
             ) : (
               <div className="bg-placeholder">请上传人物透明背景图</div>
             )}
-
-            {/* Frame Layer - Always stays on top of the character but below overlays */}
-            <img src={selectedFrame.image} className="frame-overlay" alt="Frame" />
 
             {/* Top Overlays */}
             <img src={selectedBand.icon} className="band-overlay" alt="Band" />
